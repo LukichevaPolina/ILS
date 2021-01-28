@@ -8,5 +8,6 @@ int* GreedyAlg(double** matr, const int N);
 int* way(double** matr, double* distance, const int N);
 double WayCost(int* way, double** matr, const int N);
 int* LocalSearch(int* way, double** matr, const int N);
+bool CheckGCycle(int* way, const int N);
 
 #endif

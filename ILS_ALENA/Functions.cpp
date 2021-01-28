@@ -210,3 +210,18 @@ int* LocalSearch(int* way, double** matr, const int N)
     }
     return cost;
   }
+
+  bool CheckGCycle(int* way, const int N) {
+      int counter = 0;
+      for (int i = 0; i <= N; ++i) {
+          for (int j = 0; j < N; j++) {
+              if (i == way[j]) {
+                  counter += 1;
+              }
+          }
+          if (counter != 1) {
+              return false;
+          }
+      }
+      return true;
+  }
