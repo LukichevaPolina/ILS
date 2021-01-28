@@ -3,6 +3,8 @@
 #include <fstream>
 #include <array>
 #include <map>
+#include <ctime>
+#include <cstdlib>
 
 #include "Functions.h"
 
@@ -63,33 +65,12 @@ std::pair <const int, double**> ParserFileToMatr(char* file) {
   }
 }
 
-//int* way(double** matr, double* distance, const int N) {
-//    int* way = new int[N]{ 0 };   // массив посещенных вершин
-//    int end = N-1; // индекс конечной вершины = N - 1
-//    way[0] = end + 1; // начальный элемент - конечная вершина
-//    int k = 1; // индекс предыдущей вершины
-//    int weight = distance[end]; // вес конечной вершины
-//
-//    while (end != 0) // пока не дошли до начальной вершины
-//    {
-//        for (int i = 0; i < N; i++) // просматриваем все вершины
-//            if (matr[i][end] != 0)   // если связь есть
-//            {
-//                int temp = weight - matr[i][end]; // определяем вес пути из предыдущей вершины
-//                if (temp == distance[i]) // если вес совпал с рассчитанным
-//                {                 // значит из этой вершины и был переход
-//                    weight = temp; // сохраняем новый вес
-//                    end = i;       // сохраняем предыдущую вершину
-//                    way[k] = i + 1; // и записываем ее в массив
-//                    k++;
-//                }
-//            }
-//    }
-//    // Вывод пути (начальная вершина оказалась в конце массива из k элементов)
-//    for (int i = k - 1; i >= 0; i--)
-//        printf("%3d ", way[i]);
-//    return way;
-//}
+
+void arrCpy(int dest[], const int source[], int n) {
+  for (n--; n >= 0; n--) {
+    dest[n] = source[n];
+  }
+}
 
 int* GreedyAlg(double** matr, const int N) {
   double* dist = new double[N]; // мин расстояние
@@ -135,78 +116,56 @@ int* GreedyAlg(double** matr, const int N) {
     }
   }
   return way;
+  //std::cout << minCost;
+  //return minPath;
 }
 
 int* LocalSearch(int* way, double** matr, const int N)
 {
-  double global_diff = -0.1, diff = 0;
-  double currentCost = WayCost(way, matr, N), newCost = currentCost;
+  for (int k = 0; k < N; ++k) {
+    double global_diff = -0.1, diff = -0.1;
+    double currentCost = WayCost(way, matr, N), newCost = currentCost + 1;
+    int* new_way = new int[N];
+    int imin, jmin;
+    while (currentCost <= newCost) {
+      srand(time(0));
+      int firstV = rand() % (N - 1), secondV = rand() % (N - 1);
+      while (firstV == secondV) {
+        firstV = rand() % (N - 1), secondV = rand() % (N - 1);
+      }
+      if (firstV > secondV) {
+        int a = firstV;
+        firstV = secondV;
+        secondV = a;
+      }
 
-  int imin, jmin;
-  while (global_diff < 0) {
+      for (int k = 0; k < N; ++k) {
+        new_way[k] = way[k];
+      }
+      for (int i = firstV; i <= (secondV + firstV) / 2; ++i) {
+        int a = new_way[i];
+        new_way[i] = new_way[firstV + (secondV - i)];
+        new_way[firstV + (secondV - i)] = a;
+      }
 
-    global_diff = 0;
-    int n = rand() % (N - 1);
-    int p1 = n;
-    for (int i = 0; i < n - 2; ++i) {
-      int t1 = p1;
-      p1 = way[i];
-      int t2 = way[i + 1];
-      double spd_var = matr[t1 - 1][p1 - 1];
-      for (int j = i + 2; j < n; ++j) {
-        int p2 = t2;
-        t2 = way[j];
-        double diff = (matr[t1 - 1][p1 - 1] - matr[p2 - 1][t2 - 1]) + (matr[p1 - 1][t2 - 1] - spd_var);
-
-        if (diff < 0) {
-          global_diff = diff;
-          imin = i;
-          jmin = j;
-          break;
+      newCost = WayCost(new_way, matr, N);
+      if (newCost < currentCost)
+        for (int k = 0; k < N; ++k) {
+          new_way[k] = way[k];
         }
-      }
-      if (diff < 0)
-        break;
     }
-    if (global_diff < 0)
-      for (int i = imin; i < (imin + jmin) / 2; ++i) {
-        int a = way[i];
-        way[i] = way[imin + (jmin - i)];
-        way[imin + (jmin - i)] = a;
-      }
+    std::cout << std::endl << newCost;
   }
-
-  newCost = WayCost(way, matr, N);
-
-
-    //double currentCost = WayCost(way, matr, N);
-    //double newCost = currentCost;
-    //int i = 0;
-    //int* usingVertex = new int[N];
-    //while (newCost >= currentCost) {
-    //  int firstVertex = rand() % (N - 1);
-    //  int secondVertex = rand() % (N - 1);
-    //  while (firstVertex == secondVertex ) { // избегаем повторения рандомных вершин
-    //    firstVertex = rand() % (N - 1);
-    //    secondVertex = rand() % (N - 1);
-    //  }
-    //  int a = way[firstVertex];
-    //  way[firstVertex] = way[secondVertex];
-    //  way[secondVertex] = a;
-    //  newCost = WayCost(way, matr, N);
-    //  ++i;
-    //}
-    std::cout << newCost;
-
     return way;
-  }
+  
+}
 
-  double WayCost(int* way, double** matr, const int N)
-  {
-    way[N] = way[0];
-    double cost = 0;
-    for (int i = 0; i < N; ++i) {
-      cost += matr[way[i] - 1][way[i + 1] - 1];
-    }
-    return cost;
+double WayCost(int* way, double** matr, const int N)
+{
+  way[N] = way[0];
+  double cost = 0;
+  for (int i = 0; i < N; ++i) {
+    cost += matr[way[i] - 1][way[i + 1] - 1];
   }
+  return cost;
+}
