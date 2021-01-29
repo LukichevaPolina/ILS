@@ -1,0 +1,7 @@
+﻿  Functions.cpp
+C:\Users\Polina\ILS\ILS_ALENA\Functions.cpp(127,15): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+C:\Users\Polina\ILS\ILS_ALENA\Functions.cpp(125,7): warning C4101: imin: неиспользованная локальная переменная
+C:\Users\Polina\ILS\ILS_ALENA\Functions.cpp(125,13): warning C4101: jmin: неиспользованная локальная переменная
+C:\Users\Polina\ILS\ILS_ALENA\Functions.cpp(184,13): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+C:\Users\Polina\ILS\ILS_ALENA\Functions.cpp(69): warning C4715: ParserFileToMatr: значение возвращается не при всех путях выполнения
+  ILS_ALENA.vcxproj -> C:\Users\Polina\ILS\x64\Debug\ILS_ALENA.exe
