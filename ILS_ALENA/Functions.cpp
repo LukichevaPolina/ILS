@@ -122,11 +122,11 @@ int* GreedyAlg(double** matr, const int N) {
 
 int* LocalSearch(int* way, double** matr, const int N)
 {
-  for (int k = 0; k < N; ++k) {
-    double global_diff = -0.1, diff = -0.1;
-    double currentCost = WayCost(way, matr, N), newCost = currentCost + 1;
-    int* new_way = new int[N];
-    int imin, jmin;
+  double global_diff = -0.1, diff = -0.1;
+  double currentCost = WayCost(way, matr, N), newCost = currentCost + 1;
+  int* new_way = new int[N];
+  int imin, jmin;
+  for (int k = 0; k < 100000; ++k) {
     while (currentCost <= newCost) {
       srand(time(0));
       int firstV = rand() % (N - 1), secondV = rand() % (N - 1);
@@ -147,14 +147,17 @@ int* LocalSearch(int* way, double** matr, const int N)
         new_way[firstV + (secondV - i)] = a;
       }
       newCost = WayCost(new_way, matr, N);
-      if (newCost < currentCost)
+      if (newCost < currentCost) {
         for (int k = 0; k < N; ++k) {
           new_way[k] = way[k];
         }
+        currentCost = newCost;
+        break;
+      }
     }
-    std::cout << std::endl << newCost;
   }
-    return way;
+  std::cout << currentCost;
+  return way;
 }
 
 double WayCost(int* way, double** matr, const int N)
