@@ -73,49 +73,87 @@ void arrCpy(int dest[], const int source[], int n) {
 }
 
 int* GreedyAlg(double** matr, const int N) {
-  double* dist = new double[N]; // мин рассто€ние
-  int* way = new int[N] { 0 };  // мин путь
-  int* visited = new int[N]; // посещенные вершины
-  double temp, min;
-  int min_ind = 0, k = 0;
-  for (int i = 0; i < N; i++)
-  {
-    dist[i] = DBL_MAX;
-    visited[i] = 1;
-  }
-  dist[0] = 0;
-
-  while (min_ind != INT_MAX) {
-    min_ind = INT_MAX;
-    min = DBL_MAX;
-    for (int i = 0; i < N; i++)
-    { // ≈сли вершину ещЄ не обошли и метка меньше min
-      if ((visited[i] == 1) && (dist[i] < min))
-      {
-        min = dist[i];
-        min_ind = i;
-      }
-    }
-
-    if (min_ind != INT_MAX)
+  float coolcost = 10000000, cost = 0;
+  int count = 0;
+  int* coolpath = new int[N];
+  for (int i = 0; i < N; ++i) {
+    cost = 0, count = 0;
+    int check[1000] = { 0 };
+    int path[1000] = { 0 };
+    check[i] = 2;
+    int k = i;
+    int flagflag = 1;
+    while (flagflag != 0 || count == 0)
     {
-      for (int i = 0; i < N; i++)
-      {
-        if (matr[min_ind][i] > 0 && visited[i] == 1)
+      int min = 100000000, minnum = 0, flag = 0;
+      for (int j = 0; j < N; j++)
+        if (matr[k][j] != 0 && matr[k][j] < min && (check[j] == 0 || check[j] == 2 && count == N - 1))
         {
-          temp = min + matr[min_ind][i];
-          if (temp < dist[i])
-          {
-            dist[i] = temp;
-          }
+          min = matr[k][j];
+          minnum = j;
+          flag = 1;
         }
+      if (flag == 0)
+        flagflag = 0;
+      else {
+        check[minnum] = 1;
+        path[count] = minnum + 1;
+        cost += min;
+        count++;
+        k = minnum;
       }
-      visited[min_ind] = 0;
-      way[k] = min_ind + 1;
-      k += 1;
+    }
+    if (count == N && cost < coolcost) {
+      for (int i = 0; i <= N; i++)
+        coolpath[i] = path[i];
+      coolcost = cost;
     }
   }
-  return way;
+  return coolpath;
+
+  //double* dist = new double[N]; // мин рассто€ние
+  //int* way = new int[N] { 0 };  // мин путь
+  //int* visited = new int[N]; // посещенные вершины
+  //double temp, min;
+  //int min_ind = 0, k = 0;
+  //for (int i = 0; i < N; i++)
+  //{
+  //  dist[i] = DBL_MAX;
+  //  visited[i] = 1;
+  //}
+  //dist[0] = 0;
+
+  //while (min_ind != INT_MAX) {
+  //  min_ind = INT_MAX;
+  //  min = DBL_MAX;
+  //  for (int i = 0; i < N; i++)
+  //  { // ≈сли вершину ещЄ не обошли и метка меньше min
+  //    if ((visited[i] == 1) && (dist[i] < min))
+  //    {
+  //      min = dist[i];
+  //      min_ind = i;
+  //    }
+  //  }
+
+  //  if (min_ind != INT_MAX)
+  //  {
+  //    for (int i = 0; i < N; i++)
+  //    {
+  //      if (matr[min_ind][i] > 0 && visited[i] == 1)
+  //      {
+  //        temp = min + matr[min_ind][i];
+  //        if (temp < dist[i])
+  //        {
+  //          dist[i] = temp;
+  //        }
+  //      }
+  //    }
+  //    visited[min_ind] = 0;
+  //    way[k] = min_ind + 1;
+  //    k += 1;
+  //  }
+  //}
+  //return way;
   //std::cout << minCost;
   //return minPath;
 }
@@ -126,7 +164,7 @@ int* LocalSearch(int* way, double** matr, const int N)
   double currentCost = WayCost(way, matr, N), newCost = currentCost + 1;
   int* new_way = new int[N];
   int imin, jmin;
-  for (int k = 0; k < 100000; ++k) {
+  for (int l = 0; l < 1; ++l) {
     while (currentCost <= newCost) {
       srand(time(0));
       int firstV = rand() % (N - 1), secondV = rand() % (N - 1);
