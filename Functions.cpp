@@ -5,6 +5,9 @@
 #include <map>
 #include <ctime>
 #include <cstdlib>
+#include <random>
+#include <algorithm>
+#include <chrono>
 
 #include "Functions.h"
 
@@ -15,7 +18,6 @@ double** AdjacencyMatrix(std::map <int, std::array<int, 2>> nodes) {
 
   std::map <int, std::array<int, 2>>::iterator it1 = nodes.begin();
 
-
   for (int i = 0; it1 != nodes.end(); ++i, ++it1) {
     std::map <int, std::array<int, 2>>::iterator it2 = it1;
     for (int j = i; it2 != nodes.end(); ++j, ++it2) {
@@ -24,7 +26,6 @@ double** AdjacencyMatrix(std::map <int, std::array<int, 2>> nodes) {
       adjMatrix[j][i] = dist;
     }
   }
-
   return adjMatrix;
 }
 
@@ -34,7 +35,6 @@ double Distance(int x1, int y1, int x2, int y2) {
 
 std::pair <const int, double**> ParserFileToMatr(char* file) {
   std::string line;
-  // std::map <std::string, int[2]> nodes = new ;
   std::ifstream in(file);
 
   if (in.is_open()) {
@@ -54,9 +54,6 @@ std::pair <const int, double**> ParserFileToMatr(char* file) {
     }
 
     std::map <int, std::array<int, 2>>::iterator it = nodes.begin();
-    for (; it != nodes.end(); ++it) {
-      std::cout << it->first << " " << it->second[0] << ' ' << it->second[1] << std::endl;
-    }
     double** adjMatrix = new double* [N];
     for (int i = 0; i < N; ++i)
       adjMatrix[i] = new double[N];
@@ -110,92 +107,50 @@ int* GreedyAlg(double** matr, const int N) {
     }
   }
   return coolpath;
-
-  //double* dist = new double[N]; // мин рассто€ние
-  //int* way = new int[N] { 0 };  // мин путь
-  //int* visited = new int[N]; // посещенные вершины
-  //double temp, min;
-  //int min_ind = 0, k = 0;
-  //for (int i = 0; i < N; i++)
-  //{
-  //  dist[i] = DBL_MAX;
-  //  visited[i] = 1;
-  //}
-  //dist[0] = 0;
-
-  //while (min_ind != INT_MAX) {
-  //  min_ind = INT_MAX;
-  //  min = DBL_MAX;
-  //  for (int i = 0; i < N; i++)
-  //  { // ≈сли вершину ещЄ не обошли и метка меньше min
-  //    if ((visited[i] == 1) && (dist[i] < min))
-  //    {
-  //      min = dist[i];
-  //      min_ind = i;
-  //    }
-  //  }
-
-  //  if (min_ind != INT_MAX)
-  //  {
-  //    for (int i = 0; i < N; i++)
-  //    {
-  //      if (matr[min_ind][i] > 0 && visited[i] == 1)
-  //      {
-  //        temp = min + matr[min_ind][i];
-  //        if (temp < dist[i])
-  //        {
-  //          dist[i] = temp;
-  //        }
-  //      }
-  //    }
-  //    visited[min_ind] = 0;
-  //    way[k] = min_ind + 1;
-  //    k += 1;
-  //  }
-  //}
-  //return way;
-  //std::cout << minCost;
-  //return minPath;
 }
 
 int* LocalSearch(int* way, double** matr, const int N)
 {
-  double global_diff = -0.1, diff = -0.1;
-  double currentCost = WayCost(way, matr, N), newCost = currentCost + 1;
-  int* new_way = new int[N];
-  int imin, jmin;
-  for (int l = 0; l < 1; ++l) {
-    while (currentCost <= newCost) {
-      srand(time(0));
-      int firstV = rand() % (N - 1), secondV = rand() % (N - 1);
-      while (firstV == secondV) {
-        firstV = rand() % (N - 1), secondV = rand() % (N - 1);
-      }
-      if (firstV > secondV) {
-        int a = firstV;
-        firstV = secondV;
-        secondV = a;
-      }
-      for (int k = 0; k < N; ++k) {
-        new_way[k] = way[k];
-      }
-      for (int i = firstV; i <= (secondV + firstV) / 2; ++i) {
-        int a = new_way[i];
-        new_way[i] = new_way[firstV + (secondV - i)];
-        new_way[firstV + (secondV - i)] = a;
-      }
-      newCost = WayCost(new_way, matr, N);
-      if (newCost < currentCost) {
-        for (int k = 0; k < N; ++k) {
-          new_way[k] = way[k];
+  int* best_way = new int[1000];
+  int* new_way = new int[1000];
+  std::copy(way, way + N, best_way);
+  bool improved = 1;
+  int l = 0;
+  while (improved) {
+    improved = 0;
+    for (int i = 1; i < N - 2; ++i)
+      for (int j = i + 2; j < N; ++j) {
+        std::copy(best_way, best_way + N, new_way);
+        for (int k = i; k <= j; ++k) {
+          new_way[k] = best_way[j + i - k];
         }
-        currentCost = newCost;
-        break;
+        if (WayCost(new_way, matr, N) < WayCost(best_way, matr, N)) {
+          std::copy(new_way, new_way + N, best_way);
+          improved = 1;
+        }
       }
+    std::copy(best_way, best_way + N, way);
+  }
+  std::cout << std::endl;
+  return best_way;
+}
+
+std::pair <int*, double> ILS(double** matr, const int N) {
+  int* Way = new int[N];
+  int* curWay = new int[N];
+  Way = GreedyAlg(matr, N);
+  Way = LocalSearch(Way, matr, N);
+  double min_dist = WayCost(Way, matr, N);
+  for (int i = 0; i < 100; i++) {
+    curWay = four_opt(Way, matr, N);
+    curWay = LocalSearch(curWay, matr, N);
+    double cost = WayCost(curWay, matr, N);
+    if (WayCost(Way, matr, N) > cost) {
+      std::copy(curWay, curWay + N, Way);
+      min_dist = cost;
     }
   }
-  std::cout << currentCost;
-  return way;
+  return { Way, min_dist };
 }
 
 double WayCost(int* way, double** matr, const int N)
@@ -207,3 +162,34 @@ double WayCost(int* way, double** matr, const int N)
   }
   return cost;
 }
+
+int* four_opt(int* way, double** matr, const int N)
+{
+  double cost = WayCost(way, matr, N);
+  bool improved = true;
+  int pos1, pos1_p, pos2, pos2_p, pos3, pos3_p, first = 0, last = N - 1;
+  int* new_way = new int[N];
+  int k = 0;
+  improved = false;
+  srand(time(0));
+  pos1 = 1 + rand() % (N / 2);
+  pos1_p = pos1 - 1;
+  pos2 = 1 + pos1 + rand() % (N - pos1);
+  pos2_p = pos2 - 1;
+  pos3 = pos2 + rand() % ((N - pos2) + 1);
+  pos3_p = pos3 - 1;
+  std::copy(way, way + N, new_way);
+
+  int pos = pos1 - first + 1;
+  for (int i = pos3; i <= last; ++i) {
+    new_way[pos++] = way[i];
+  }
+  for (int i = pos2; i <= pos3_p; ++i) {
+    new_way[pos++] = way[i];
+  }
+  for (int i = pos1 + 1; i <= pos2_p; ++i) {
+    new_way[pos++] = way[i];
+  }
+  return new_way;
+}
+

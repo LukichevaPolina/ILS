@@ -1,4 +1,0 @@
-﻿  Functions.cpp
-C:\Users\Polina\source\repos\ILS_ALENA\ILS_ALENA\Functions.cpp(11,21): warning C4018: <: несоответствие типов со знаком и без знака
-C:\Users\Polina\source\repos\ILS_ALENA\ILS_ALENA\Functions.cpp(64): warning C4715: ParserFileToMatr: значение возвращается не при всех путях выполнения
-  ILS_ALENA.vcxproj -> C:\Users\Polina\source\repos\ILS_ALENA\Debug\ILS_ALENA.exe
